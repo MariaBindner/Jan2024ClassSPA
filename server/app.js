@@ -21,6 +21,9 @@ db.once(
   console.log.bind(console, "Successfully opened connection to Mongo!")
 );
 
+// get the PORT from the environment variables, OR use 4040 as default
+const PORT = process.env.PORT || 4040;
+
 // Initialize the Express application
 const app = express();
 
@@ -99,6 +102,9 @@ app.get("/weather/:city", (request, response) => {
 });
 
 app.use("/pizzas", pizzas);
+//app.use("/crusts", crusts);
+
 // Tell the Express app to start listening
 // Let the humans know I am running and listening on 4040
-app.listen(4040, () => console.log("Listening on port 4040"));
+
+app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
