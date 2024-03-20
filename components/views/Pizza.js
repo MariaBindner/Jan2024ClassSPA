@@ -21,14 +21,28 @@ export default state => html`
         <th>Sauce</th>
         <th>Toppings</th>
         <th>Customer</th>
+        <th>Actions</th>
       </tr>
       ${state.pizzas
-        .map(pizza => {
-          return `<tr><td>${pizza.crust}</td><td>${pizza.cheese}</td><td>${
-            pizza.sauce
-          }</td><td>${pizza.toppings.join(" & ")}</td><td>${
-            pizza.customer
-          }</td></tr>`;
+        .map((pizza, index) => {
+          return html`
+            <tr id="${pizza._id}">
+              <td>${pizza.crust}</td>
+              <td>${pizza.cheese}</td>
+              <td>${pizza.sauce}</td>
+              <td>${pizza.toppings.join(" & ")}</td>
+              <td>${pizza.customer}</td>
+              <td>
+                <button
+                  class="delete"
+                  data-id="${pizza._id}"
+                  data-index="${index}"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          `;
         })
         .join("")}
     </table>

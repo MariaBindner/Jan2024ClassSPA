@@ -9,7 +9,8 @@ const pizzaSchema = new mongoose.Schema({
   crust: {
     type: String,
     required: true,
-    enum: ["thin", "chicago", "deep-dish", "hella-thick"]
+    enum: ["thin", "chicago", "deep-dish", "hella-thick"],
+    maxLength: 12
   },
   cheese: {
     type: String,

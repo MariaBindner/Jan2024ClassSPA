@@ -41,9 +41,7 @@ router.get("/", async (request, response) => {
 
 // Get a single pizza by ID
 router.get("/:id", async (request, response) => {
-  //http://localhost:4040/pizzas/555/toppings   /:id/toppings
-  //http://localhost:4040/orders/555/pizzas/887   /:id/pizzas/:pizzaId
-
+  // http://localhost:4040/pizzas/pizzaId
   try {
     const data = await Pizza.findById(request.params.id);
 
@@ -56,10 +54,11 @@ router.get("/:id", async (request, response) => {
   }
 });
 
-// Delete a pizza by ID
+// Remove a single pizza by ID
 router.delete("/:id", async (request, response) => {
+  // http://localhost:4040/pizzas/pizzaId
   try {
-    const data = await Pizza.findByIdAndRemove(request.params.id, {});
+    const data = await Pizza.findByIdAndRemove(request.params.id);
 
     response.json(data);
   } catch (error) {
@@ -73,16 +72,16 @@ router.delete("/:id", async (request, response) => {
 // Update a single pizza by ID
 router.put("/:id", async (request, response) => {
   try {
-    const body = request.body;
+    const foobar = request.body;
 
     const data = await Pizza.findByIdAndUpdate(
       request.params.id,
       {
         $set: {
-          crust: body.crust,
-          cheese: body.cheese,
-          sauce: body.sauce,
-          toppings: body.toppings
+          crust: foobar.crust,
+          cheese: foobar.cheese,
+          sauce: foobar.sauce,
+          toppings: foobar.toppings
         }
       },
       {

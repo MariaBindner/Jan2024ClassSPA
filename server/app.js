@@ -1,12 +1,14 @@
 // 'Import' the Express module instead of http
 import express from "express";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import pizzas from "./routers/pizzas.js";
+import crusts from "./routers/crusts.js";
 
 // Load environment variables from .env file
 dotenv.config();
 
+// Connect to mongodb atlas server
 mongoose.connect(process.env.MONGODB, {
   // Configuration options to remove deprecation warnings, just include them to remove clutter
   useNewUrlParser: true,
@@ -27,6 +29,14 @@ const PORT = process.env.PORT || 4040;
 // Initialize the Express application
 const app = express();
 
+function checkApiKey(request, response, next) {
+  if ("apiKey" in request.query && request.query.apiKey.length > 0) {
+    next();
+  } else {
+    response.status(401).json({ message: "Unauthorized" });
+  }
+}
+
 const logging = (request, response, next) => {
   console.log(
     `${request.method} ${request.url} ${new Date().toLocaleString("en-us")}`
@@ -35,30 +45,49 @@ const logging = (request, response, next) => {
 };
 
 // CORS Middleware
-const cors = (req, res, next) => {
-  res.setHeader(
+const cors = (request, response, next) => {
+  response.setHeader(
     "Access-Control-Allow-Headers",
     "X-Requested-With,content-type, Accept,Authorization,Origin"
   );
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
+  // if you wanted to not have "*" in the origin
+  // and instead return the original URL
+  // const url = request.get("host");
+  // response.setHeader("Access-Control-Allow-Origin", `${url}`);
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, OPTIONS, PUT, PATCH, DELETE"
   );
-  res.setHeader("Access-Control-Allow-Credentials", true);
+  response.setHeader("Access-Control-Allow-Credentials", true);
   next();
 };
 
 app.use(cors);
+// app.use(checkApiKey);
 app.use(express.json());
 app.use(logging);
+
+app.get("/", (request, response) => {
+  response.json({
+    hours: {
+      monday: "Closed",
+      tuesday: "10am-8pm",
+      wednesday: "10am-8pm",
+      thursday: "10am-8pm",
+      friday: "10am-10pm",
+      saturday: "10am-12am",
+      sunday: "10am-6pm"
+    }
+  });
+});
 
 // Handle the request with HTTP GET method from http://localhost:4040/status
 app.get("/status", (request, response) => {
   // Create the headers for response by default 200
   // Create the response body
   // End and return the response
-  response.send(JSON.stringify({ message: "Service healthy" }));
+  response.json({ message: "Service healthy" });
 });
 
 // Handle the request with HTTP GET method with query parameters and a url parameter
@@ -102,9 +131,8 @@ app.get("/weather/:city", (request, response) => {
 });
 
 app.use("/pizzas", pizzas);
-//app.use("/crusts", crusts);
+app.use("/crusts", crusts);
 
 // Tell the Express app to start listening
 // Let the humans know I am running and listening on 4040
-
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));

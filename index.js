@@ -3,19 +3,20 @@ import * as store from "./store";
 import Navigo from "navigo";
 import { capitalize } from "lodash";
 import axios from "axios";
-// router
+
 const router = new Navigo("/");
-// render
+
 function render(state = store.Home) {
   document.querySelector("#root").innerHTML = `
       ${Header(state)}
       ${Nav(store.Links)}
       ${Main(state)}
-      ${Footer()}
+      ${Footer(store.Footer)}
     `;
   router.updatePageLinks();
   afterRender(state);
 }
+
 function afterRender(state) {
   // add menu toggle to bars icon in nav bar
   document.querySelector(".fa-bars").addEventListener("click", () => {
@@ -29,12 +30,12 @@ function afterRender(state) {
 
       // Get the form element
       const inputList = event.target.elements;
-      console.log("Input Element List", inputList);
+      // console.log("Input Element List", inputList);
 
       // Create an empty array to hold the toppings
       const toppings = [];
 
-      // Iterate over the toppings array
+      // // Iterate over the toppings array
 
       for (let input of inputList.toppings) {
         // If the value of the checked attribute is true then add the value to the toppings array
@@ -51,7 +52,7 @@ function afterRender(state) {
         sauce: inputList.sauce.value,
         toppings: toppings
       };
-      // Log the request body to the console
+      // // Log the request body to the console
       console.log("request Body", requestData);
 
       axios
@@ -68,6 +69,7 @@ function afterRender(state) {
         });
     });
   }
+
   if (state.view === "Pizza") {
     document
       .getElementById("search-button")
@@ -88,18 +90,43 @@ function afterRender(state) {
             console.log("It puked", error);
           });
       });
+
+    Array.from(document.getElementsByClassName("delete")).forEach(button => {
+      button.addEventListener("click", event => {
+        event.preventDefault();
+
+        const pizzaId = event.target.dataset.id;
+        const pizzaIndex = event.target.dataset.index;
+
+        if (confirm(`Are you sure you want to delete pizza ${pizzaId}?`)) {
+          axios
+            .delete(`${process.env.PIZZA_PLACE_API_URL}/pizzas/${pizzaId}`)
+            .then(response => {
+              // We need to store the response to the state, in the next step but in the meantime let's see what it looks like so that we know what to store from the response.
+              store.Pizza.pizzas.splice(pizzaIndex, 1);
+              router.navigate("/pizza");
+            })
+            .catch(error => {
+              console.log("It puked", error);
+            });
+        }
+      });
+    });
   }
 }
 
 router.hooks({
   before: (done, params) => {
     // We need to know what view we are on to know what data to fetch
-    const view =
-      params && params.data && params.data.view
-        ? capitalize(params.data.view)
-        : "Home";
+    // const view = params && params.data && params.data.view ? capitalize(params.data.view) : "Home";
+    let view = "Home";
+    if (params && params.data && params.data.view) {
+      view = capitalize(params.data.view);
+    }
+
     // Add a switch case statement to handle multiple routes
     switch (view) {
+      // Add a case for each view that needs data from an API
       case "Home":
         axios
           .get(
@@ -121,7 +148,6 @@ router.hooks({
             done();
           });
         break;
-      // Add a case for each view that needs data from an API
       case "Pizza":
         // New Axios get request utilizing already made environment variable
         axios
@@ -129,6 +155,7 @@ router.hooks({
           .then(response => {
             // We need to store the response to the state, in the next step but in the meantime let's see what it looks like so that we know what to store from the response.
             console.log("response", response);
+            console.log("response data", response.data);
 
             store.Pizza.pizzas = response.data;
 
@@ -139,8 +166,13 @@ router.hooks({
             done();
           });
         break;
+      case "Menu":
+        // Do stuff here
+        done();
+        break;
       default:
         done();
+        break;
     }
   },
   already: params => {
@@ -158,6 +190,7 @@ router
     "/": () => render(),
     ":view": params => {
       let view = capitalize(params.data.view);
+
       if (view in store) {
         render(store[view]);
       } else {

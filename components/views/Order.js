@@ -81,7 +81,6 @@ export default () => html`
         <label for="customer">Customer</label>
         <input type="text" name="customer" id="customer" />
       </div>
-      />
       <input type="submit" name="submit" value="Submit Pizza" />
     </form>
   </section>
