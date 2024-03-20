@@ -2,6 +2,18 @@ import html from "html-literal";
 
 export default state => html`
   <section id="pizza">
+    <div class="filter">
+      <select name="column" id="column">
+        <option value="">Select a column</option>
+        <option value="crust">Crust</option>
+        <option value="cheese">Cheese</option>
+        <option value="sauce">Sauce</option>
+        <option value="toppings">Toppings</option>
+        <option value="customer">Customer</option>
+      </select>
+      <input type="search" name="filter" id="filter" />
+      <button id="search-button">Search</button>
+    </div>
     <table id="pizzas">
       <tr>
         <th>Crust</th>
